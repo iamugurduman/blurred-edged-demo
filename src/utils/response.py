@@ -1,15 +1,21 @@
-
 from sdks.novavision.src.helper.package import PackageHelper
-from components.Package.src.models.PackageModel import PackageModel, PackageConfigs, ConfigExecutor, PackageOutputs, PackageResponse, PackageExecutor, OutputImage
-
+from src.novavision.novafilters.models.models import (
+    PackageModel, 
+    PackageConfigs, 
+    ConfigExecutor, 
+    SingleFilterExecutor, 
+    SingleFilterExecutorResponse, 
+    SingleFilterExecutorOutputs, 
+    OutputImageOne
+)
 
 def build_response(context):
-    outputImage = OutputImage(value=context.image)
-    Outputs = PackageOutputs(outputImage=outputImage)
-    packageResponse = PackageResponse(outputs=Outputs)
-    packageExecutor = PackageExecutor(value=packageResponse)
-    executor = ConfigExecutor(value=packageExecutor)
-    packageConfigs = PackageConfigs(executor=executor)
-    package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
-    packageModel = package.build_model(context)
-    return packageModel
+    output_image = OutputImageOne(value=context.image)
+    outputs_container = SingleFilterExecutorOutputs(outputImageOne=output_image)
+    executor_response = SingleFilterExecutorResponse(outputs=outputs_container)
+    single_filter_executor = SingleFilterExecutor(value=executor_response)
+    config_executor = ConfigExecutor(value=single_filter_executor)
+    package_configs = PackageConfigs(executor=config_executor)
+    package = PackageHelper(packageModel=PackageModel, packageConfigs=package_configs)
+    package_model = package.build_model(context)
+    return package_model
