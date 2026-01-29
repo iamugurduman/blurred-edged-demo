@@ -245,7 +245,36 @@ class SingleFilterExecutor(Config):
             }
         }
 
+# Executor2:Dual Filter
 
+class DualFilterExecutorInputs(Inputs):
+    inputImageOne: InputImageOne
+    inputImageTwo: InputImageTwo
+
+class DualFilterExecutorConfigs(Configs):
+    configMixType: ConfigMixType
+
+class DualFilterExecutorOutputs(Outputs):
+    outputImageOne: OutputImageOne 
+    outputImageTwo: OutputImageTwo 
+
+class DualFilterExecutorRequest(Request):
+    inputs: Optional[DualFilterExecutorInputs]
+    configs: DualFilterExecutorConfigs
+
+    class Config:
+        json_schema_extra = {
+            "target": "configs"
+        }
+
+class DualFilterExecutorResponse(Response):
+    outputs: DualFilterExecutorOutputs
+
+class DualFilterExecutor(Config):
+    name: Literal["DualFilterExecutor"] = "DualFilterExecutor"
+    value: Union[DualFilterExecutorRequest, DualFilterExecutorResponse]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
 
     class Config:
         title = "Dual Filter Executor (2-in, 2-out)"
