@@ -1,11 +1,11 @@
-
 from pydantic import Field, validator
 from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
+# Inputs-Outputs(With Validators)
 
-class InputImage(Input):
-    name: Literal["inputImage"] = "inputImage"
+class InputImageOne(Input):
+    name: Literal["inputImageOne"] = "inputImageOne"
     value: Union[List[Image], Image]
     type: str = "object"
 
@@ -18,12 +18,12 @@ class InputImage(Input):
             return "list"
 
     class Config:
-        title = "Image"
+        title = "Image Input 1"
 
 
-class OutputImage(Output):
-    name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image],Image]
+class InputImageTwo(Input):
+    name: Literal["inputImageTwo"] = "inputImageTwo"
+    value: Union[List[Image], Image]
     type: str = "object"
 
     @validator("type", pre=True, always=True)
@@ -35,109 +35,241 @@ class OutputImage(Output):
             return "list"
 
     class Config:
-        title = "Image"
+        title = "Image Input 2"
 
 
-class KeepSideFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
+class OutputImageOne(Output):
+    name: Literal["outputImageOne"] = "outputImageOne"
+    value: Union[List[Image], Image]
+    type: str = "object"
 
-    class Config:
-        title = "Disable"
-
-
-class KeepSideTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
+    @validator("type", pre=True, always=True)
+    def set_type_based_on_value(cls, value, values):
+        value = values.get('value')
+        if isinstance(value, Image):
+            return "object"
+        elif isinstance(value, list):
+            return "list"
 
     class Config:
-        title = "Enable"
+        title = "Output Image 1"
 
 
-class KeepSideBBox(Config):
-    """
-        Rotate image without catting off sides.
-    """
-    name: Literal["KeepSide"] = "KeepSide"
-    value: Union[KeepSideTrue, KeepSideFalse]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
+class OutputImageTwo(Output):
+    name: Literal["outputImageTwo"] = "outputImageTwo"
+    value: Union[List[Image], Image]
+    type: str = "object"
+
+    @validator("type", pre=True, always=True)
+    def set_type_based_on_value(cls, value, values):
+        value = values.get('value')
+        if isinstance(value, Image):
+            return "object"
+        elif isinstance(value, list):
+            return "list"
 
     class Config:
-        title = "Keep Sides"
+        title = "Output Image 2"
 
 
-class Degree(Config):
-    """
-        Positive angles specify counterclockwise rotation while negative angles indicate clockwise rotation.
-    """
-    name: Literal["Degree"] = "Degree"
-    value: int = Field(ge=-359.0, le=359.0,default=0)
+
+# Single Filter Configs
+# Blur
+class BlurKernelSize(Config):
+    name: Literal["BlurKernelSize"] = "BlurKernelSize"
+    value: int = Field(default=5)
+    type: Literal["integer"] = "integer"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Kernel Size"
+
+class BlurSigma(Config):
+    name: Literal["BlurSigma"] = "BlurSigma"
+    value: float = Field(default=0.0)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["[-359, 359]"] = "[-359, 359]"
 
     class Config:
-        title = "Angle"
+        title = "Sigma X"
+
+class OptionBlur(Config):
+    blurKernelSize: BlurKernelSize
+    blurSigma: BlurSigma
+    name: Literal["Blur"] = "Blur"
+    value: Literal["Blur"] = "Blur"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Gaussian Blur"
 
 
-class PackageInputs(Inputs):
-    inputImage: InputImage
+#Edge
+class EdgeThreshold(Config):
+    name: Literal["EdgeThreshold"] = "EdgeThreshold"
+    value: int = Field(default=100)
+    type: Literal["integer"] = "integer"
+    field: Literal["textInput"] = "textInput"
+    
+    class Config:
+        title = "Edge Threshold"
+
+class OptionEdge(Config):
+    edgeThreshold: EdgeThreshold
+    name: Literal["Edge"] = "Edge"
+    value: Literal["Edge"] = "Edge"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Canny Edge"
 
 
-class PackageConfigs(Configs):
-    degree: Degree
-    drawBBox: KeepSideBBox
+#Single Filter Type Dropdown
+class ConfigFilterType(Config):
+    """
+    Select whether to Blur or detect Edges.
+    """
+    name: Literal["configFilterType"] = "configFilterType"
+    value: Union[OptionBlur, OptionEdge]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
+    class Config:
+        title = "Operation"
+        json_schema_extra = {
+            "shortDescription": "Filter Mode"
+        }
 
 
-class PackageOutputs(Outputs):
-    outputImage: OutputImage
+
+#Dual Filter Configs
+#Blend
+class BlendAlpha(Config):
+    """Mixing factor (0.0 - 1.0)"""
+    name: Literal["BlendAlpha"] = "BlendAlpha"
+    value: float = Field(default=0.5)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Alpha"
+
+class OptionBlend(Config):
+    blendAlpha: BlendAlpha
+    name: Literal["Blend"] = "Blend"
+    value: Literal["Blend"] = "Blend"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Blend Images"
 
 
-class PackageRequest(Request):
-    inputs: Optional[PackageInputs]
-    configs: PackageConfigs
+#Concat
+class ConcatAxis(Config):
+    """0 for Vertical, 1 for Horizontal"""
+    name: Literal["ConcatAxis"] = "ConcatAxis"
+    value: int = Field(default=1)
+    type: Literal["integer"] = "integer"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Axis"
+
+class OptionConcat(Config):
+    concatAxis: ConcatAxis
+    name: Literal["Concat"] = "Concat"
+    value: Literal["Concat"] = "Concat"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Concatenate"
+
+
+#Dual Filter Mix Type Dropdown
+class ConfigMixType(Config):
+    """
+    Select how to combine the two images.
+    """
+    name: Literal["configMixType"] = "configMixType"
+    value: Union[OptionBlend, OptionConcat]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
+    class Config:
+        title = "Mix Mode"
+        json_schema_extra = {
+            "shortDescription": "Mixing Logic"
+        }
+
+
+
+#EXECUTORS (Single & Dual)
+#Executor 1: SingleFilter
+
+class SingleFilterExecutorInputs(Inputs):
+    inputImageOne: InputImageOne
+
+class SingleFilterExecutorConfigs(Configs):
+    configFilterType: ConfigFilterType
+
+class SingleFilterExecutorOutputs(Outputs):
+    outputImageOne: OutputImageOne
+
+class SingleFilterExecutorRequest(Request):
+    inputs: Optional[SingleFilterExecutorInputs]
+    configs: SingleFilterExecutorConfigs
 
     class Config:
         json_schema_extra = {
             "target": "configs"
         }
 
+class SingleFilterExecutorResponse(Response):
+    outputs: SingleFilterExecutorOutputs
 
-class PackageResponse(Response):
-    outputs: PackageOutputs
-
-
-class PackageExecutor(Config):
-    name: Literal["Package"] = "Package"
-    value: Union[PackageRequest, PackageResponse]
+class SingleFilterExecutor(Config):
+    name: Literal["SingleFilterExecutor"] = "SingleFilterExecutor"
+    value: Union[SingleFilterExecutorRequest, SingleFilterExecutorResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Package"
+        title = "Single Filter Executor (1-in, 1-out)"
         json_schema_extra = {
             "target": {
-                "value": 0
+                "value": 1  # Points to SingleFilter.py (2nd file)
             }
         }
 
 
+
+    class Config:
+        title = "Dual Filter Executor (2-in, 2-out)"
+        json_schema_extra = {
+            "target": {
+                "value": 0 # Points to DualFilter.py (1st file)
+            }
+        }
+
+
+#Main Package Model
+
 class ConfigExecutor(Config):
+    """
+    Master selector for the Package.
+    """
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor]
+    value: Union[SingleFilterExecutor, DualFilterExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True
 
     class Config:
         title = "Task"
-        json_schema_extra = {
-            "target": "value"
-        }
 
 
 class PackageConfigs(Configs):
@@ -145,6 +277,6 @@ class PackageConfigs(Configs):
 
 
 class PackageModel(Package):
+    name: Literal["BlurredEdgedDemo"] = "BlurredEdgedDemo"
     configs: PackageConfigs
     type: Literal["component"] = "component"
-    name: Literal["BlurredEdgedDemo"] = "BlurredEdgedDemo"
