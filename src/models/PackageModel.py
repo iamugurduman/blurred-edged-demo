@@ -241,10 +241,9 @@ class SingleFilterExecutor(Config):
         title = "Single Filter Executor (1-in, 1-out)"
         json_schema_extra = {
             "target": {
-                "value": 0  # Points to executors entry 0
+                "value": 1  # Points to SingleFilter.py (2nd file)
             }
         }
-
 
 # Executor2:Dual Filter
 
@@ -281,7 +280,7 @@ class DualFilterExecutor(Config):
         title = "Dual Filter Executor (2-in, 2-out)"
         json_schema_extra = {
             "target": {
-                "value": 1 # Points to executors entry 1
+                "value": 0 # Points to DualFilter.py (1st file)
             }
         }
 
