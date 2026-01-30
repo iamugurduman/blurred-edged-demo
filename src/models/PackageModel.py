@@ -136,8 +136,8 @@ class ConfigFilterType(Config):
     name: Literal["configFilterType"] = "configFilterType"
     value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
-    # Using independent dropdownlist for safety/consistency
-    field: Literal["dropdownlist"] = "dropdownlist"
+    # Using dependentDropdownlist to show sub-options based on selection
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
         title = "Operation"
@@ -199,8 +199,8 @@ class ConfigMixType(Config):
     name: Literal["configMixType"] = "configMixType"
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
-    # CRITICAL FIX: dropdownlist ensures this appears in UI
-    field: Literal["dropdownlist"] = "dropdownlist"
+    # Using dependentDropdownlist to show sub-options based on selection
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
         title = "Mix Mode"
