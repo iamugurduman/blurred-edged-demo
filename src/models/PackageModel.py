@@ -2,7 +2,7 @@ from pydantic import Field, validator
 from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
-# Inputs-Outputs(With Validators)
+#Input Definitions
 
 class InputImageOne(Input):
     name: Literal["inputImageOne"] = "inputImageOne"
@@ -38,6 +38,8 @@ class InputImageTwo(Input):
         title = "Image Input 2"
 
 
+# Output Definitions
+
 class OutputImageOne(Output):
     name: Literal["outputImageOne"] = "outputImageOne"
     value: Union[List[Image], Image]
@@ -72,8 +74,7 @@ class OutputImageTwo(Output):
         title = "Output Image 2"
 
 
-
-# Single Filter Configs
+#Single Filter Configs
 # Blur
 class BlurKernelSize(Config):
     name: Literal["BlurKernelSize"] = "BlurKernelSize"
@@ -105,7 +106,7 @@ class OptionBlur(Config):
         title = "Gaussian Blur"
 
 
-#Edge
+# Edge
 class EdgeThreshold(Config):
     name: Literal["EdgeThreshold"] = "EdgeThreshold"
     value: int = Field(default=100)
@@ -126,7 +127,7 @@ class OptionEdge(Config):
         title = "Canny Edge"
 
 
-#Single Filter Type Dropdown
+# Single Filter Type Dropdown
 class ConfigFilterType(Config):
     """
     Select whether to Blur or detect Edges.
@@ -144,8 +145,7 @@ class ConfigFilterType(Config):
 
 
 
-#Dual Filter Configs
-#Blend
+# Blend
 class BlendAlpha(Config):
     """Mixing factor (0.0 - 1.0)"""
     name: Literal["BlendAlpha"] = "BlendAlpha"
@@ -167,7 +167,7 @@ class OptionBlend(Config):
         title = "Blend Images"
 
 
-#Concat
+# Concat
 class ConcatAxis(Config):
     """0 for Vertical, 1 for Horizontal"""
     name: Literal["ConcatAxis"] = "ConcatAxis"
@@ -189,12 +189,13 @@ class OptionConcat(Config):
         title = "Concatenate"
 
 
-#Dual Filter Mix Type Dropdown
+# Dual Filter Mix Type Dropdown
 class ConfigMixType(Config):
     """
     Select how to combine the two images.
     """
-    name: Literal["configMixType"] = "configMixType"
+
+    name: Literal["ConfigMixType"] = "ConfigMixType" 
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -207,7 +208,7 @@ class ConfigMixType(Config):
 
 
 
-#EXECUTORS (Single & Dual)
+
 #Executor 1: SingleFilter
 
 class SingleFilterExecutorInputs(Inputs):
@@ -241,11 +242,12 @@ class SingleFilterExecutor(Config):
         title = "Single Filter Executor (1-in, 1-out)"
         json_schema_extra = {
             "target": {
-                "value": 1  # Points to SingleFilter.py (2nd file)
+                "value": 1  
             }
         }
 
-# Executor2:Dual Filter
+
+#Executor2: Dual Filter
 
 class DualFilterExecutorInputs(Inputs):
     inputImageOne: InputImageOne
@@ -280,12 +282,12 @@ class DualFilterExecutor(Config):
         title = "Dual Filter Executor (2-in, 2-out)"
         json_schema_extra = {
             "target": {
-                "value": 0 # Points to DualFilter.py (1st file)
+                "value": 0 
             }
         }
 
 
-#Main Package Model
+# Main Package Model
 
 class ConfigExecutor(Config):
     """
