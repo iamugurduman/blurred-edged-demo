@@ -6,10 +6,15 @@ from src.novavision.novafilters.models.models import (
     SingleFilterExecutor, 
     SingleFilterExecutorResponse, 
     SingleFilterExecutorOutputs, 
-    OutputImageOne
+    OutputImageOne,
+   
+    DualFilterExecutor,
+    DualFilterExecutorResponse,
+    DualFilterExecutorOutputs,
+    OutputImageTwo
 )
 
-def build_response(context):
+def build_response_single(context):
     output_image = OutputImageOne(value=context.image)
     outputs_container = SingleFilterExecutorOutputs(outputImageOne=output_image)
     executor_response = SingleFilterExecutorResponse(outputs=outputs_container)
@@ -19,3 +24,28 @@ def build_response(context):
     package = PackageHelper(packageModel=PackageModel, packageConfigs=package_configs)
     package_model = package.build_model(context)
     return package_model
+
+def build_response_dual(context):
+    outputImage = OutputImageOne(value=context.image)
+
+    img2_val = getattr(context, 'image_two', None)
+    outputImage2 = OutputImageTwo(value=img2_val if img2_val is not None else context.image) 
+    
+    dualOutputs = DualFilterExecutorOutputs(outputImageOne=outputImage, outputImageTwo=outputImage2)
+    dualResponse = DualFilterExecutorResponse(outputs=dualOutputs)
+    dualExecutor = DualFilterExecutor(value=dualResponse)
+    
+    executor = ConfigExecutor(value=dualExecutor)
+    package_configs = PackageConfigs(executor=executor)
+    package = PackageHelper(packageModel=PackageModel, packageConfigs=package_configs)
+    package_model = package.build_model(context)
+    return package_model
+
+
+def build_response(context):
+    if hasattr(context, 'image_two') and context.image_two is not None:
+        return build_response_dual(context)
+    elif hasattr(context, 'executor') and 'Dual' in str(context.executor):
+        return build_response_dual(context)
+    else:
+        return build_response_single(context)
