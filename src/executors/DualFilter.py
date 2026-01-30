@@ -1,5 +1,11 @@
 from sdks.novavision.src.base.component import Component
-from ..models.models import DualFilterExecutorRequest, DualFilterExecutorResponse, OutputImageOne, OutputImageTwo
+from ..models.PackageModel import (
+    DualFilterExecutorRequest, 
+    DualFilterExecutorResponse, 
+    DualFilterExecutorOutputs, 
+    OutputImageOne, 
+    OutputImageTwo
+)
 import cv2
 import numpy as np
 
