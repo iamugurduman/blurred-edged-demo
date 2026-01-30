@@ -1,11 +1,10 @@
 from pydantic import Field, validator
 from typing import List, Optional, Union, Literal
-from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, 
+from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, \
     Config
 
 
-# Inputs-Outputs(With Validators)
-
+# Inputs
 class InputImageOne(Input):
     name: Literal["inputImageOne"] = "inputImageOne"
     value: Union[List[Image], Image]
@@ -40,6 +39,7 @@ class InputImageTwo(Input):
         title = "Image Input 2"
 
 
+# Outputs
 class OutputImageOne(Output):
     name: Literal["outputImageOne"] = "outputImageOne"
     value: Union[List[Image], Image]
@@ -74,8 +74,8 @@ class OutputImageTwo(Output):
         title = "Output Image 2"
 
 
-# Single Filter Configs
-# Blur
+# --- Single Filter Configuration ---
+
 class BlurKernelSize(Config):
     name: Literal["BlurKernelSize"] = "BlurKernelSize"
     value: int = Field(default=5)
@@ -108,7 +108,6 @@ class OptionBlur(Config):
         title = "Gaussian Blur"
 
 
-# Edge
 class EdgeThreshold(Config):
     name: Literal["EdgeThreshold"] = "EdgeThreshold"
     value: int = Field(default=100)
@@ -130,7 +129,6 @@ class OptionEdge(Config):
         title = "Canny Edge"
 
 
-# Single Filter Type Dropdown
 class ConfigFilterType(Config):
     """
     Select whether to Blur or detect Edges.
@@ -138,7 +136,8 @@ class ConfigFilterType(Config):
     name: Literal["configFilterType"] = "configFilterType"
     value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
-    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    # Using independent dropdownlist for safety/consistency
+    field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
         title = "Operation"
@@ -147,8 +146,8 @@ class ConfigFilterType(Config):
         }
 
 
-# Dual Filter Configs
-# Blend
+# --- Dual Filter Configuration ---
+
 class BlendAlpha(Config):
     """Mixing factor (0.0 - 1.0)"""
     name: Literal["BlendAlpha"] = "BlendAlpha"
@@ -171,7 +170,6 @@ class OptionBlend(Config):
         title = "Blend Images"
 
 
-# Concat
 class ConcatAxis(Config):
     """0 for Vertical, 1 for Horizontal"""
     name: Literal["ConcatAxis"] = "ConcatAxis"
@@ -194,7 +192,6 @@ class OptionConcat(Config):
         title = "Concatenate"
 
 
-# Dual Filter Mix Type Dropdown
 class ConfigMixType(Config):
     """
     Select how to combine the two images.
@@ -202,7 +199,8 @@ class ConfigMixType(Config):
     name: Literal["configMixType"] = "configMixType"
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist" 
+    # CRITICAL FIX: dropdownlist ensures this appears in UI
+    field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
         title = "Mix Mode"
@@ -211,20 +209,39 @@ class ConfigMixType(Config):
         }
 
 
-# EXECUTORS (Single & Dual)
-# Executor 1: SingleFilter
+# --- Inputs Groups ---
 
 class SingleFilterExecutorInputs(Inputs):
     inputImageOne: InputImageOne
 
 
+class DualFilterExecutorInputs(Inputs):
+    inputImageOne: InputImageOne
+    inputImageTwo: InputImageTwo
+
+
+# --- Configs Groups ---
+
 class SingleFilterExecutorConfigs(Configs):
     configFilterType: ConfigFilterType
 
 
+class DualFilterExecutorConfigs(Configs):
+    configMixType: ConfigMixType
+
+
+# --- Outputs Groups ---
+
 class SingleFilterExecutorOutputs(Outputs):
     outputImageOne: OutputImageOne
 
+
+class DualFilterExecutorOutputs(Outputs):
+    outputImageOne: OutputImageOne
+    outputImageTwo: OutputImageTwo
+
+
+# --- Requests ---
 
 class SingleFilterExecutorRequest(Request):
     inputs: Optional[SingleFilterExecutorInputs]
@@ -234,41 +251,6 @@ class SingleFilterExecutorRequest(Request):
         json_schema_extra = {
             "target": "configs"
         }
-
-
-class SingleFilterExecutorResponse(Response):
-    outputs: SingleFilterExecutorOutputs
-
-
-class SingleFilterExecutor(Config):
-    name: Literal["SingleFilterExecutor"] = "SingleFilterExecutor"
-    value: Union[SingleFilterExecutorRequest, SingleFilterExecutorResponse]
-    type: Literal["object"] = "object"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Single Filter Executor (1-in, 1-out)"
-        json_schema_extra = {
-            "target": {
-                "value": 0  # Points to executors entry 0
-            }
-        }
-
-
-# Executor2:Dual Filter
-
-class DualFilterExecutorInputs(Inputs):
-    inputImageOne: InputImageOne
-    inputImageTwo: InputImageTwo
-
-
-class DualFilterExecutorConfigs(Configs):
-    configMixType: ConfigMixType
-
-
-class DualFilterExecutorOutputs(Outputs):
-    outputImageOne: OutputImageOne
-    outputImageTwo: OutputImageTwo
 
 
 class DualFilterExecutorRequest(Request):
@@ -281,8 +263,31 @@ class DualFilterExecutorRequest(Request):
         }
 
 
+# --- Responses ---
+
+class SingleFilterExecutorResponse(Response):
+    outputs: SingleFilterExecutorOutputs
+
+
 class DualFilterExecutorResponse(Response):
     outputs: DualFilterExecutorOutputs
+
+
+# --- Executors ---
+
+class SingleFilterExecutor(Config):
+    name: Literal["SingleFilterExecutor"] = "SingleFilterExecutor"
+    value: Union[SingleFilterExecutorRequest, SingleFilterExecutorResponse]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Single Filter Executor"
+        json_schema_extra = {
+            "target": {
+                "value": 0 # Points to SingleFilter.py (First alphabetically)
+            }
+        }
 
 
 class DualFilterExecutor(Config):
@@ -292,20 +297,17 @@ class DualFilterExecutor(Config):
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Dual Filter Executor (2-in, 2-out)"
+        title = "Dual Filter Executor"
         json_schema_extra = {
             "target": {
-                "value": 1  # Points to executors entry 1
+                "value": 1 # Points to ZDualFilter.py (Second alphabetically)
             }
         }
 
 
-# Main Package Model
+# --- Main Package ---
 
 class ConfigExecutor(Config):
-    """
-    Master selector for the Package.
-    """
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
     value: Union[SingleFilterExecutor, DualFilterExecutor]
     type: Literal["executor"] = "executor"
