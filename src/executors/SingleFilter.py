@@ -1,66 +1,58 @@
-"""
-    Single Filter Executor: Blur or Edge Detection
-"""
-import os
+from sdks.novavision.src.base.component import Component
+from ..models.models import SingleFilterExecutorRequest, SingleFilterExecutorResponse, OutputImageOne
 import cv2
-import sys
 import numpy as np
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
-
-from sdks.novavision.src.media.image import Image
-from sdks.novavision.src.base.component import Component
-from sdks.novavision.src.helper.executor import Executor
-from ..response import build_response
-from ..models.PackageModel import PackageModel
-
 class SingleFilter(Component):
-    def __init__(self, request, bootstrap):
-        super().__init__(request, bootstrap)
-        self.request.model = PackageModel(**(self.request.data))
-        # Retrieve config object (Wrapper around OptionBlur/OptionEdge)
-        self.config_wrapper = self.request.get_param("configFilterType")
-        self.image = self.request.get_param("inputImageOne")
+    def run(self, request: SingleFilterExecutorRequest) -> SingleFilterExecutorResponse:
 
-    @staticmethod
-    def bootstrap(config: dict) -> dict:
-        return {}
+        input_data = request.inputs.inputImageOne.value
+        
+ 
+        
+     
+        img = input_data.data if hasattr(input_data, 'data') else input_data
 
-    def apply_filter(self, img):
-        if img is None:
-            return None
-            
-        selected_option = self.config_wrapper.value
+        # 2. Get Configuration
+        
+        config_wrapper = request.configs.configFilterType
+        selected_option = config_wrapper.value
+        
+        processed_img = img.copy()
+
+        # 3. Switch Logic based on Type
+        
         
         if selected_option.name == "Blur":
+            # Extract Blur Parameters
+            
             k_size = selected_option.blurKernelSize.value
             sigma = selected_option.blurSigma.value
+            
+            # Kernel size must be odd
             if k_size % 2 == 0:
                 k_size += 1
-            return cv2.GaussianBlur(img, (k_size, k_size), sigma)
-
+                
+            processed_img = cv2.GaussianBlur(img, (k_size, k_size), sigma)
+            
         elif selected_option.name == "Edge":
+            # Extract Edge Parameters
             threshold = selected_option.edgeThreshold.value
+            invert = selected_option.edgeInvert.value
+            
+            # Canny Edge Detection
+           
             edges = cv2.Canny(img, threshold / 2, threshold)
-            return cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+            
+            if invert:
+                edges = cv2.bitwise_not(edges)
+                
+            # Convert single channel edge to 3-channel for consistency if needed
+            processed_img = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
-        else:
-            return img
-
-    def run(self):
-        # 1. Get Frame from Redis
-        img = Image.get_frame(img=self.image, redis_db=self.redis_db)
+        # 4. Prepare Output
+      
+        output = OutputImageOne(value=processed_img)
         
-        # 2. Process
-        img.value = self.apply_filter(img.value)
-        
-        # 3. Set Frame back to Redis
-        self.image = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
-        
-        # 4. Build Response
-        packageModel = build_response(context=self)
-        return packageModel
-
-
-if "__main__" == __name__:
-    Executor(sys.argv[1]).run()
+        return SingleFilterExecutorResponse(outputs={"outputImageOne": output})
+singleFilter.py
