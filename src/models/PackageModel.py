@@ -77,7 +77,7 @@ class OutputImageTwo(Output):
 # --- Single Filter Configuration ---
 
 class BlurKernelSize(Config):
-    name: Literal["BlurKernelSize"] = "BlurKernelSize"
+    name: Literal["blurKernelSize"] = "blurKernelSize"
     value: int = Field(default=5)
     type: Literal["integer"] = "integer"
     field: Literal["textInput"] = "textInput"
@@ -87,7 +87,7 @@ class BlurKernelSize(Config):
 
 
 class BlurSigma(Config):
-    name: Literal["BlurSigma"] = "BlurSigma"
+    name: Literal["blurSigma"] = "blurSigma"
     value: float = Field(default=0.0)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
@@ -97,8 +97,8 @@ class BlurSigma(Config):
 
 
 class OptionBlur(Config):
-    blurKernelSize: BlurKernelSize
-    blurSigma: BlurSigma
+    blurKernelSize: BlurKernelSize = Field(default_factory=lambda: BlurKernelSize())
+    blurSigma: BlurSigma = Field(default_factory=lambda: BlurSigma())
     name: Literal["Blur"] = "Blur"
     value: Literal["Blur"] = "Blur"
     type: Literal["string"] = "string"
@@ -109,7 +109,7 @@ class OptionBlur(Config):
 
 
 class EdgeThreshold(Config):
-    name: Literal["EdgeThreshold"] = "EdgeThreshold"
+    name: Literal["edgeThreshold"] = "edgeThreshold"
     value: int = Field(default=100)
     type: Literal["integer"] = "integer"
     field: Literal["textInput"] = "textInput"
@@ -119,7 +119,7 @@ class EdgeThreshold(Config):
 
 
 class OptionEdge(Config):
-    edgeThreshold: EdgeThreshold
+    edgeThreshold: EdgeThreshold = Field(default_factory=lambda: EdgeThreshold())
     name: Literal["Edge"] = "Edge"
     value: Literal["Edge"] = "Edge"
     type: Literal["string"] = "string"
@@ -134,7 +134,7 @@ class ConfigFilterType(Config):
     Select whether to Blur or detect Edges.
     """
     name: Literal["configFilterType"] = "configFilterType"
-    value: Union[OptionBlur, OptionEdge]
+    value: Union[OptionBlur, OptionEdge] = Field(default_factory=lambda: OptionBlur())
     type: Literal["object"] = "object"
     # Using dependentDropdownlist to show sub-options based on selection
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -150,7 +150,7 @@ class ConfigFilterType(Config):
 
 class BlendAlpha(Config):
     """Mixing factor (0.0 - 1.0)"""
-    name: Literal["BlendAlpha"] = "BlendAlpha"
+    name: Literal["blendAlpha"] = "blendAlpha"
     value: float = Field(default=0.5)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
@@ -160,7 +160,7 @@ class BlendAlpha(Config):
 
 
 class OptionBlend(Config):
-    blendAlpha: BlendAlpha
+    blendAlpha: BlendAlpha = Field(default_factory=lambda: BlendAlpha())
     name: Literal["Blend"] = "Blend"
     value: Literal["Blend"] = "Blend"
     type: Literal["string"] = "string"
@@ -172,7 +172,7 @@ class OptionBlend(Config):
 
 class ConcatAxis(Config):
     """0 for Vertical, 1 for Horizontal"""
-    name: Literal["ConcatAxis"] = "ConcatAxis"
+    name: Literal["concatAxis"] = "concatAxis"
     value: int = Field(default=1)
     type: Literal["integer"] = "integer"
     field: Literal["textInput"] = "textInput"
@@ -182,7 +182,7 @@ class ConcatAxis(Config):
 
 
 class OptionConcat(Config):
-    concatAxis: ConcatAxis
+    concatAxis: ConcatAxis = Field(default_factory=lambda: ConcatAxis())
     name: Literal["Concat"] = "Concat"
     value: Literal["Concat"] = "Concat"
     type: Literal["string"] = "string"
@@ -197,7 +197,7 @@ class ConfigMixType(Config):
     Select how to combine the two images.
     """
     name: Literal["configMixType"] = "configMixType"
-    value: Union[OptionBlend, OptionConcat]
+    value: Union[OptionBlend, OptionConcat] = Field(default_factory=lambda: OptionBlend())
     type: Literal["object"] = "object"
     # Using dependentDropdownlist to show sub-options based on selection
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -223,11 +223,11 @@ class DualFilterExecutorInputs(Inputs):
 # --- Configs Groups ---
 
 class SingleFilterExecutorConfigs(Configs):
-    configFilterType: ConfigFilterType
+    configFilterType: ConfigFilterType = Field(default_factory=lambda: ConfigFilterType())
 
 
 class DualFilterExecutorConfigs(Configs):
-    configMixType: ConfigMixType
+    configMixType: ConfigMixType = Field(default_factory=lambda: ConfigMixType())
 
 
 # --- Outputs Groups ---
@@ -244,8 +244,8 @@ class DualFilterExecutorOutputs(Outputs):
 # --- Requests ---
 
 class SingleFilterExecutorRequest(Request):
-    inputs: Optional[SingleFilterExecutorInputs]
-    configs: SingleFilterExecutorConfigs
+    inputs: Optional[SingleFilterExecutorInputs] = None
+    configs: SingleFilterExecutorConfigs = Field(default_factory=lambda: SingleFilterExecutorConfigs())
 
     class Config:
         json_schema_extra = {
@@ -254,8 +254,8 @@ class SingleFilterExecutorRequest(Request):
 
 
 class DualFilterExecutorRequest(Request):
-    inputs: Optional[DualFilterExecutorInputs]
-    configs: DualFilterExecutorConfigs
+    inputs: Optional[DualFilterExecutorInputs] = None
+    configs: DualFilterExecutorConfigs = Field(default_factory=lambda: DualFilterExecutorConfigs())
 
     class Config:
         json_schema_extra = {
@@ -277,7 +277,7 @@ class DualFilterExecutorResponse(Response):
 
 class SingleFilterExecutor(Config):
     name: Literal["SingleFilterExecutor"] = "SingleFilterExecutor"
-    value: Union[SingleFilterExecutorRequest, SingleFilterExecutorResponse]
+    value: Union[SingleFilterExecutorRequest, SingleFilterExecutorResponse] = Field(default_factory=lambda: SingleFilterExecutorRequest())
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
@@ -292,7 +292,7 @@ class SingleFilterExecutor(Config):
 
 class DualFilterExecutor(Config):
     name: Literal["DualFilterExecutor"] = "DualFilterExecutor"
-    value: Union[DualFilterExecutorRequest, DualFilterExecutorResponse]
+    value: Union[DualFilterExecutorRequest, DualFilterExecutorResponse] = Field(default_factory=lambda: DualFilterExecutorRequest())
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
