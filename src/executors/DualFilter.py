@@ -57,21 +57,20 @@ class DualFilter(Component):
         return result_img
 
     def run(self):
-        # 1. Get Frames from Redis
+        #Get Frames from Redis
         img1 = Image.get_frame(img=self.image, redis_db=self.redis_db)
         img2 = Image.get_frame(img=self.image_two, redis_db=self.redis_db)
         
-        # 2. Process
+        #Process
         if img1 is not None and img2 is not None:
              result_val = self.apply_dual_filter(img1.value, img2.value)
              img1.value = result_val
         
-        # 3. Set Frame back to Redis (Updating Image One with the result)
+        #Set Frame back to Redis (Updating Image One with the result)
         self.image = Image.set_frame(img=img1, package_uID=self.uID, redis_db=self.redis_db)
         
-        # Note: image_two remains unchanged in Redis, but exists in context for build_response logic
         
-        # 4. Build Response
+        #Build Response
         packageModel = build_response(context=self)
         return packageModel
 
