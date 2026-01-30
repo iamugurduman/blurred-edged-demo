@@ -31,7 +31,7 @@ def build_response_dual(context):
     img2_val = getattr(context, 'image_two', None)
     outputImage2 = OutputImageTwo(value=img2_val if img2_val is not None else context.image) 
     
-    dualOutputs = DualFilterExecutorOutputs(outputImageOne=outputImage, outputImageTwo=outputImage2)
+    dualOutputs = DualFilterExecutorOutputs(outputImageOne=outputImage, outputImageTwo=outputImageTwo)
     dualResponse = DualFilterExecutorResponse(outputs=dualOutputs)
     dualExecutor = DualFilterExecutor(value=dualResponse)
     
