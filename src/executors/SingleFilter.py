@@ -16,9 +16,8 @@ class SingleFilter(Component):
         # MOCK SDK BEHAVIOR: Assuming input_data has a 'data' array
         img = input_data.data if hasattr(input_data, 'data') else input_data
 
-        # 2. Get Configuration
-    
-        config_wrapper = request.configs.typeOfFilter
+        #Get Configuration
+        config_wrapper = request.configs.configFilterType
         selected_option = config_wrapper.value
 
         
