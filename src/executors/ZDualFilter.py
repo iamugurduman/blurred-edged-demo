@@ -1,74 +1,94 @@
-"""
-    Dual Filter Executor: Blend or Concatenate two images
-"""
-import os
+from sdks.novavision.src.base.component import Component
+from ..models.models import SingleFilterExecutorRequest, SingleFilterExecutorResponse, OutputImageOne
 import cv2
-import sys
 import numpy as np
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
+class SingleFilter(Component):
+    def run(self, request: SingleFilterExecutorRequest) -> SingleFilterExecutorResponse:
 
-from sdks.novavision.src.media.image import Image
-from sdks.novavision.src.base.component import Component
-from sdks.novavision.src.helper.executor import Executor
-from ..response import build_response
-from ..models.PackageModel import PackageModel
+        input_data = request.inputs.inputImageOne.value
+        
+ 
+        
+     
+        img = input_data.data if hasattr(input_data, 'data') else input_data
+
+        # 2. Get Configuration
+        
+        config_wrapper = request.configs.configFilterType
+        selected_option = config_wrapper.value
+        
+        processed_img = img.copy()
+
+        # 3. Switch Logic based on Type
+        
+        
+        if selected_option.name == "Blur":
+      …
+[10:59, 1/30/2026] Uğur: from sdks.novavision.src.base.component import Component
+from ..models.PackageModel import (
+    DualFilterExecutorRequest, 
+    DualFilterExecutorResponse, 
+    DualFilterExecutorOutputs, 
+    OutputImageOne, 
+    OutputImageTwo
+)
+import cv2
+import numpy as np
+
 
 class DualFilter(Component):
-    def __init__(self, request, bootstrap):
-        super().__init__(request, bootstrap)
-        self.request.model = PackageModel(**(self.request.data))
-        # Ayarları al
-        self.config_wrapper = self.request.get_param("configMixType")
-        self.image = self.request.get_param("inputImageOne")
-        self.image_two = self.request.get_param("inputImageTwo")
+    def run(self, request: DualFilterExecutorRequest) -> DualFilterExecutorResponse:
+        # 1. Get Inputs
+        img1 = request.inputs.inputImageOne.value
+        img2 = request.inputs.inputImageTwo.value
 
-    @staticmethod
-    def bootstrap(config: dict) -> dict:
-        return {}
+        img1_data = img1.data if hasattr(img1, 'data') else img1
+        img2_data = img2.data if hasattr(img2, 'data') else img2
 
-    def apply_dual_filter(self, img1, img2):
-        # ... İşlem mantığı (Blend/Concat) ...
-        if img1 is None or img2 is None:
-            return img1
-            
-        rows, cols, _ = img1.shape
-        img2_resized = cv2.resize(img2, (cols, rows))
-        
-        selected_option = self.config_wrapper.value
+        rows, cols, _ = img1_data.shape
+        img2_resized = cv2.resize(img2_data, (cols, rows))
+
+        # 2. Get Configuration
+        config_wrapper = request.configs.configMixType
+        selected_option = config_wrapper.value
+
         result_img = None
-        
+        mask_img = np.zeros_like(img1_data)  # Placeholder mask
+
+        # 3. Switch Logic
         if selected_option.name == "Blend":
+            # Access Blend Parameters
             alpha = selected_option.blendAlpha.value
+            gamma = 0  # Simple gamma, could be param
+
             beta = 1.0 - alpha
-            result_img = cv2.addWeighted(img1, alpha, img2_resized, beta, 0.0)
-            
+            result_img = cv2.addWeighted(img1_data, alpha, img2_resized, beta, gamma)
+
+            mask_img[:] = int(alpha * 255)
+
         elif selected_option.name == "Concat":
-            axis = selected_option.concatAxis.value
+            # Access Concat Parameters
+            axis = selected_option.concatAxis.value  # 0=Vertical, 1=Horizontal
+
             if axis == 1:
-                result_img = cv2.hconcat([img1, img2_resized])
+                # Horizontal
+                result_img = cv2.hconcat([img1_data, img2_resized])
             else:
-                result_img = cv2.vconcat([img1, img2_resized])
-        
-        return result_img
+                # Vertical
+                result_img = cv2.vconcat([img1_data, img2_resized])
 
-    def run(self):
-        # 1. Redis'ten resimleri çek (YENİ YAPI)
-        img1 = Image.get_frame(img=self.image, redis_db=self.redis_db)
-        img2 = Image.get_frame(img=self.image_two, redis_db=self.redis_db)
-        
-        # 2. İşle
-        if img1 is not None and img2 is not None:
-             result_val = self.apply_dual_filter(img1.value, img2.value)
-             img1.value = result_val
-        
-        # 3. Sonucu Redis'e yaz
-        self.image = Image.set_frame(img=img1, package_uID=self.uID, redis_db=self.redis_db)
-        
-        # 4. Response oluştur
-        packageModel = build_response(context=self)
-        return packageModel
+            # Mask indicates the join line (simple line in middle)
+            if axis == 1:
+                cv2.line(mask_img, (cols, 0), (cols, rows), (255, 255, 255), 5)
+            else:
+                cv2.line(mask_img, (0, rows), (cols, rows), (255, 255, 255), 5)
 
+        # 4. Prepare Outputs
+        output_mixed = OutputImageOne(value=result_img)
+        output_mask = OutputImageTwo(value=mask_img)
 
-if "__main__" == __name__:
-    Executor(sys.argv[1]).run()
+        return DualFilterExecutorResponse(outputs={
+            "outputImageOne": output_mixed,
+            "outputImageTwo": output_mask
+        })
