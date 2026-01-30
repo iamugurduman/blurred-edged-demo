@@ -1,5 +1,5 @@
 from sdks.novavision.src.base.component import Component
-from ..models.models import (
+from ..models.PackageModel import (
     SingleFilterExecutorRequest, 
     SingleFilterExecutorResponse, 
     SingleFilterExecutorOutputs, 
