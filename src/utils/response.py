@@ -4,20 +4,21 @@ from src.novavision.novafilters.models.models import (
     PackageConfigs, 
     ConfigExecutor, 
     SingleFilterExecutor, 
-    SingleFilterExecutorResponse, 
-    SingleFilterExecutorOutputs, 
+    SingleFilterResponse, 
+    SingleFilterOutputs, 
     OutputImageOne,
    
     DualFilterExecutor,
-    DualFilterExecutorResponse,
-    DualFilterExecutorOutputs,
+    DualFilterResponse,
+    DualFilterOutputs,
     OutputImageTwo
 )
 
+
 def build_response_single(context):
     output_image = OutputImageOne(value=context.image)
-    outputs_container = SingleFilterExecutorOutputs(outputImageOne=output_image)
-    executor_response = SingleFilterExecutorResponse(outputs=outputs_container)
+    outputs_container = SingleFilterOutputs(outputImageOne=output_image)
+    executor_response = SingleFilterResponse(outputs=outputs_container)
     single_filter_executor = SingleFilterExecutor(value=executor_response)
     config_executor = ConfigExecutor(value=single_filter_executor)
     package_configs = PackageConfigs(executor=config_executor)
@@ -25,14 +26,15 @@ def build_response_single(context):
     package_model = package.build_model(context)
     return package_model
 
+
 def build_response_dual(context):
     outputImage = OutputImageOne(value=context.image)
 
     img2_val = getattr(context, 'image_two', None)
     outputImage2 = OutputImageTwo(value=img2_val if img2_val is not None else context.image) 
     
-    dualOutputs = DualFilterExecutorOutputs(outputImageOne=outputImage, outputImageTwo=outputImageTwo)
-    dualResponse = DualFilterExecutorResponse(outputs=dualOutputs)
+    dualOutputs = DualFilterOutputs(outputImageOne=outputImage, outputImageTwo=outputImage2)
+    dualResponse = DualFilterResponse(outputs=dualOutputs)
     dualExecutor = DualFilterExecutor(value=dualResponse)
     
     executor = ConfigExecutor(value=dualExecutor)
