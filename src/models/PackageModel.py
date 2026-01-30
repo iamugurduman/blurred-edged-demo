@@ -135,7 +135,7 @@ class ConfigFilterType(Config):
     """
     Select whether to Blur or detect Edges.
     """
-    name: Literal["configFilterType"] = "configFilterType"
+    name: Literal["ConfigFilterType"] = "ConfigFilterType"
     value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -195,11 +195,13 @@ class OptionConcat(Config):
 
 
 # --- Dual Filter Mix Type Dropdown ---
-class BlurredEdgedDemo(Config):
+# FIXED: Renamed class from BlurredEdgedDemo to ConfigMixType to resolve NameError
+class ConfigMixType(Config):
     """
     Select how to combine the two images.
     """
-    name: Literal["BlurredEdgedDemo"] = "BlurredEdgedDemo"
+    # FIXED: Updated name literal to match class name (PascalCase)
+    name: Literal["ConfigMixType"] = "ConfigMixType"
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -250,7 +252,7 @@ class SingleFilterExecutor(Config):
         title = "Single Filter Executor (1-in, 1-out)"
         json_schema_extra = {
             "target": {
-                "value": 0  # Points to executors entry 0
+                "value": 1 
             }
         }
 
@@ -263,6 +265,7 @@ class DualFilterExecutorInputs(Inputs):
 
 
 class DualFilterExecutorConfigs(Configs):
+
     configMixType: ConfigMixType
 
 
@@ -295,7 +298,7 @@ class DualFilterExecutor(Config):
         title = "Dual Filter Executor (2-in, 2-out)"
         json_schema_extra = {
             "target": {
-                "value": 1  # Points to executors entry 1
+                "value": 0  # FIXED: Points to DualFilter.py (1st file, index 0)
             }
         }
 
