@@ -16,10 +16,11 @@ class SingleFilter(Component):
         # MOCK SDK BEHAVIOR: Assuming input_data has a 'data' array
         img = input_data.data if hasattr(input_data, 'data') else input_data
 
-        #Get Configuration
+        # 2. Get Configuration
+        # Accessing correct config field name
         config_wrapper = request.configs.configFilterType
+        # Typo fixed: 'value t' -> 'value'
         selected_option = config_wrapper.value
-
         
         processed_img = img.copy()
 
@@ -40,14 +41,19 @@ class SingleFilter(Component):
             # Extract Edge Parameters
             threshold = selected_option.edgeThreshold.value
             
+            
+            
             # Canny Edge Detection
             edges = cv2.Canny(img, threshold / 2, threshold)
             
-            # Convert single channel edge to 3-channel for consistency (Blue Edges on Black)
+            
+                
+        
             processed_img = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
         # 4. Prepare Output with Strict Instantiation
         output_image_one = OutputImageOne(value=processed_img)
+        
         
         outputs_container = SingleFilterExecutorOutputs(
             outputImageOne=output_image_one
