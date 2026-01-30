@@ -97,8 +97,8 @@ class BlurSigma(Config):
 
 
 class OptionBlur(Config):
-    blurKernelSize: BlurKernelSize = Field(default_factory=lambda: BlurKernelSize())
-    blurSigma: BlurSigma = Field(default_factory=lambda: BlurSigma())
+    blurKernelSize: BlurKernelSize
+    blurSigma: BlurSigma
     name: Literal["Blur"] = "Blur"
     value: Literal["Blur"] = "Blur"
     type: Literal["string"] = "string"
@@ -119,7 +119,7 @@ class EdgeThreshold(Config):
 
 
 class OptionEdge(Config):
-    edgeThreshold: EdgeThreshold = Field(default_factory=lambda: EdgeThreshold())
+    edgeThreshold: EdgeThreshold
     name: Literal["Edge"] = "Edge"
     value: Literal["Edge"] = "Edge"
     type: Literal["string"] = "string"
@@ -134,9 +134,8 @@ class ConfigFilterType(Config):
     Select whether to Blur or detect Edges.
     """
     name: Literal["configFilterType"] = "configFilterType"
-    value: Union[OptionBlur, OptionEdge] = Field(default_factory=lambda: OptionBlur())
+    value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
-    # Using dependentDropdownlist to show sub-options based on selection
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
@@ -160,7 +159,7 @@ class BlendAlpha(Config):
 
 
 class OptionBlend(Config):
-    blendAlpha: BlendAlpha = Field(default_factory=lambda: BlendAlpha())
+    blendAlpha: BlendAlpha
     name: Literal["Blend"] = "Blend"
     value: Literal["Blend"] = "Blend"
     type: Literal["string"] = "string"
@@ -182,7 +181,7 @@ class ConcatAxis(Config):
 
 
 class OptionConcat(Config):
-    concatAxis: ConcatAxis = Field(default_factory=lambda: ConcatAxis())
+    concatAxis: ConcatAxis
     name: Literal["Concat"] = "Concat"
     value: Literal["Concat"] = "Concat"
     type: Literal["string"] = "string"
@@ -197,9 +196,8 @@ class ConfigMixType(Config):
     Select how to combine the two images.
     """
     name: Literal["configMixType"] = "configMixType"
-    value: Union[OptionBlend, OptionConcat] = Field(default_factory=lambda: OptionBlend())
+    value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
-    # Using dependentDropdownlist to show sub-options based on selection
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
@@ -223,11 +221,11 @@ class DualFilterExecutorInputs(Inputs):
 # --- Configs Groups ---
 
 class SingleFilterExecutorConfigs(Configs):
-    configFilterType: ConfigFilterType = Field(default_factory=lambda: ConfigFilterType())
+    configFilterType: ConfigFilterType
 
 
 class DualFilterExecutorConfigs(Configs):
-    configMixType: ConfigMixType = Field(default_factory=lambda: ConfigMixType())
+    configMixType: ConfigMixType
 
 
 # --- Outputs Groups ---
@@ -244,8 +242,8 @@ class DualFilterExecutorOutputs(Outputs):
 # --- Requests ---
 
 class SingleFilterExecutorRequest(Request):
-    inputs: Optional[SingleFilterExecutorInputs] = None
-    configs: SingleFilterExecutorConfigs = Field(default_factory=lambda: SingleFilterExecutorConfigs())
+    inputs: Optional[SingleFilterExecutorInputs]
+    configs: SingleFilterExecutorConfigs
 
     class Config:
         json_schema_extra = {
@@ -254,8 +252,8 @@ class SingleFilterExecutorRequest(Request):
 
 
 class DualFilterExecutorRequest(Request):
-    inputs: Optional[DualFilterExecutorInputs] = None
-    configs: DualFilterExecutorConfigs = Field(default_factory=lambda: DualFilterExecutorConfigs())
+    inputs: Optional[DualFilterExecutorInputs]
+    configs: DualFilterExecutorConfigs
 
     class Config:
         json_schema_extra = {
@@ -277,7 +275,7 @@ class DualFilterExecutorResponse(Response):
 
 class SingleFilterExecutor(Config):
     name: Literal["SingleFilterExecutor"] = "SingleFilterExecutor"
-    value: Union[SingleFilterExecutorRequest, SingleFilterExecutorResponse] = Field(default_factory=lambda: SingleFilterExecutorRequest())
+    value: Union[SingleFilterExecutorRequest, SingleFilterExecutorResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
@@ -285,14 +283,14 @@ class SingleFilterExecutor(Config):
         title = "Single Filter Executor"
         json_schema_extra = {
             "target": {
-                "value": 0 # Points to SingleFilter.py (First alphabetically)
+                "value": 0
             }
         }
 
 
 class DualFilterExecutor(Config):
     name: Literal["DualFilterExecutor"] = "DualFilterExecutor"
-    value: Union[DualFilterExecutorRequest, DualFilterExecutorResponse] = Field(default_factory=lambda: DualFilterExecutorRequest())
+    value: Union[DualFilterExecutorRequest, DualFilterExecutorResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
@@ -300,7 +298,7 @@ class DualFilterExecutor(Config):
         title = "Dual Filter Executor"
         json_schema_extra = {
             "target": {
-                "value": 1 # Points to ZDualFilter.py (Second alphabetically)
+                "value": 1
             }
         }
 
@@ -316,6 +314,9 @@ class ConfigExecutor(Config):
 
     class Config:
         title = "Task"
+        json_schema_extra = {
+            "target": "value"
+        }
 
 
 class PackageConfigs(Configs):
