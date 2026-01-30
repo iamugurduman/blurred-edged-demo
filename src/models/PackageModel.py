@@ -38,7 +38,7 @@ class InputImageTwo(Input):
         title = "Image Input 2"
 
 
-# Output Definitions
+#Output Definitions
 
 class OutputImageOne(Output):
     name: Literal["outputImageOne"] = "outputImageOne"
@@ -132,7 +132,7 @@ class ConfigFilterType(Config):
     """
     Select whether to Blur or detect Edges.
     """
-    nname: Literal["ConfigFilterType"] = "ConfigFilterType"
+    name: Literal["ConfigFilterType"] = "ConfigFilterType"
     value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -144,7 +144,7 @@ class ConfigFilterType(Config):
         }
 
 
-
+# Dual Filter Configs
 # Blend
 class BlendAlpha(Config):
     """Mixing factor (0.0 - 1.0)"""
@@ -194,7 +194,6 @@ class ConfigMixType(Config):
     """
     Select how to combine the two images.
     """
-
     name: Literal["ConfigMixType"] = "ConfigMixType" 
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
@@ -209,7 +208,7 @@ class ConfigMixType(Config):
 
 
 
-#Executor 1: SingleFilter
+# Executor 1: SingleFilter
 
 class SingleFilterExecutorInputs(Inputs):
     inputImageOne: InputImageOne
@@ -247,7 +246,7 @@ class SingleFilterExecutor(Config):
         }
 
 
-#Executor2: Dual Filter
+# Executor 2: Dual Filter
 
 class DualFilterExecutorInputs(Inputs):
     inputImageOne: InputImageOne
