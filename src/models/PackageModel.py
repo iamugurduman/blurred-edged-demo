@@ -202,7 +202,7 @@ class ConfigMixType(Config):
     name: Literal["configMixType"] = "configMixType"
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
-    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    field: Literal["dropdownlist"] = "dropdownlist" 
 
     class Config:
         title = "Mix Mode"
