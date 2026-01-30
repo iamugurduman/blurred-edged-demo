@@ -132,7 +132,7 @@ class ConfigFilterType(Config):
     """
     Select whether to Blur or detect Edges.
     """
-    name: Literal["configFilterType"] = "configFilterType"
+    nname: Literal["ConfigFilterType"] = "ConfigFilterType"
     value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
