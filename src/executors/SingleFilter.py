@@ -1,63 +1,55 @@
 from sdks.novavision.src.base.component import Component
-from ..models.models import DualFilterExecutorRequest, DualFilterExecutorResponse, OutputImageOne, OutputImageTwo
+from ..models.models import (
+    SingleFilterExecutorRequest, 
+    SingleFilterExecutorResponse, 
+    SingleFilterExecutorOutputs, 
+    OutputImageOne
+)
 import cv2
 import numpy as np
 
-class DualFilter(Component):
-    def run(self, request: DualFilterExecutorRequest) -> DualFilterExecutorResponse:
-        # 1. Get Inputs
-        img1 = request.inputs.inputImageOne.value
-        img2 = request.inputs.inputImageTwo.value
+class SingleFilter(Component):
+    def run(self, request: SingleFilterExecutorRequest) -> SingleFilterExecutorResponse:
+        # 1. Get Input Image
+        input_data = request.inputs.inputImageOne.value
         
-        
-        img1_data = img1.data if hasattr(img1, 'data') else img1
-        img2_data = img2.data if hasattr(img2, 'data') else img2
-
-
-        rows, cols, _ = img1_data.shape
-        img2_resized = cv2.resize(img2_data, (cols, rows))
+        # MOCK SDK BEHAVIOR: Assuming input_data has a 'data' array
+        img = input_data.data if hasattr(input_data, 'data') else input_data
 
         # 2. Get Configuration
-        config_wrapper = request.configs.configMixType
+        config_wrapper = request.configs.configFilterType
         selected_option = config_wrapper.value
         
-        result_img = None
-        mask_img = np.zeros_like(img1_data) # Placeholder mask
+        processed_img = img.copy()
 
-        # 3. Switch Logic
-        if selected_option.name == "Blend":
-            # Access Blend Parameters
-            alpha = selected_option.blendAlpha.value
-            gamma = 0 # Simple gamma, could be param
+        # 3. Switch Logic based on Type
+        if selected_option.name == "Blur":
+            # Extract Blur Parameters
+            k_size = selected_option.blurKernelSize.value
+            sigma = selected_option.blurSigma.value
             
- 
-            beta = 1.0 - alpha
-            result_img = cv2.addWeighted(img1_data, alpha, img2_resized, beta, gamma)
+            # Kernel size must be odd
+            if k_size % 2 == 0:
+                k_size += 1
             
-            mask_img[:] = int(alpha * 255)
+            # Apply Gaussian Blur
+            processed_img = cv2.GaussianBlur(img, (k_size, k_size), sigma)
+            
+        elif selected_option.name == "Edge":
+            # Extract Edge Parameters
+            threshold = selected_option.edgeThreshold.value
+            
+            # Canny Edge Detection
+            edges = cv2.Canny(img, threshold / 2, threshold)
+            
+            # Convert single channel edge to 3-channel for consistency (Blue Edges on Black)
+            processed_img = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
-        elif selected_option.name == "Concat":
-            # Access Concat Parameters
-            axis = selected_option.concatAxis.value # 0=Vertical, 1=Horizontal
-            
-            if axis == 1:
-                # Horizontal
-                result_img = cv2.hconcat([img1_data, img2_resized])
-            else:
-                # Vertical
-                result_img = cv2.vconcat([img1_data, img2_resized])
-                
-            # Mask indicates the join line (simple line in middle)
-            if axis == 1:
-                cv2.line(mask_img, (cols, 0), (cols, rows), (255, 255, 255), 5)
-            else:
-                cv2.line(mask_img, (0, rows), (cols, rows), (255, 255, 255), 5)
-
-        # 4. Prepare Outputs
-        output_mixed = OutputImageOne(value=result_img)
-        output_mask = OutputImageTwo(value=mask_img)
+        # 4. Prepare Output with Strict Instantiation
+        output_image_one = OutputImageOne(value=processed_img)
         
-        return DualFilterExecutorResponse(outputs={
-            "outputImageOne": output_mixed,
-            "outputImageTwo": output_mask
-        })
+        outputs_container = SingleFilterExecutorOutputs(
+            outputImageOne=output_image_one
+        )
+        
+        return SingleFilterExecutorResponse(outputs=outputs_container)
