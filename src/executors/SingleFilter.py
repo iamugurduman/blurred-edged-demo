@@ -51,16 +51,16 @@ class SingleFilter(Component):
             return img
 
     def run(self):
-        # 1. Get Frame from Redis
+        #Get Frame from Redis
         img = Image.get_frame(img=self.image, redis_db=self.redis_db)
         
-        # 2. Process
+        #Process
         img.value = self.apply_filter(img.value)
         
-        # 3. Set Frame back to Redis
+        #Set Frame back to Redis
         self.image = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
         
-        # 4. Build Response
+        #Build Response
         packageModel = build_response(context=self)
         return packageModel
 
