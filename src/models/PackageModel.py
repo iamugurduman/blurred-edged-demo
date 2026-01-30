@@ -3,9 +3,8 @@ from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
 
-# ===========================================
-# INPUTS
-# ===========================================
+
+#Inputs
 
 class InputImageOne(Input):
     name: Literal["inputImageOne"] = "inputImageOne"
@@ -41,9 +40,7 @@ class InputImageTwo(Input):
         title = "Image"
 
 
-# ===========================================
-# OUTPUTS
-# ===========================================
+#Outputs
 
 class OutputImageOne(Output):
     name: Literal["outputImageOne"] = "outputImageOne"
@@ -79,9 +76,7 @@ class OutputImageTwo(Output):
         title = "Output Image 2"
 
 
-# ===========================================
-# SINGLE FILTER - Blur/Edge Options
-# ===========================================
+# ========================================
 
 class BlurKernelSize(Config):
     """Kernel size for Gaussian blur (must be odd)"""
@@ -163,9 +158,7 @@ class ConfigFilterType(Config):
         }
 
 
-# ===========================================
-# DUAL FILTER - Blend/Concat Options
-# ===========================================
+
 
 class BlendAlpha(Config):
     """Alpha value for blending (0.0 to 1.0)"""
@@ -232,9 +225,7 @@ class ConfigMixType(Config):
         }
 
 
-# ===========================================
-# SINGLE FILTER EXECUTOR
-# ===========================================
+# Single Filter Executor
 
 class SingleFilterOutputs(Outputs):
     outputImageOne: OutputImageOne
@@ -277,9 +268,7 @@ class SingleFilterExecutor(Config):
         }
 
 
-# ===========================================
-# DUAL FILTER EXECUTOR
-# ===========================================
+#Dual Filter Executor
 
 class DualFilterOutputs(Outputs):
     outputImageOne: OutputImageOne
@@ -324,9 +313,7 @@ class DualFilterExecutor(Config):
         }
 
 
-# ===========================================
-# MAIN PACKAGE
-# ===========================================
+#Main Package
 
 class ConfigExecutor(Config):
     """
