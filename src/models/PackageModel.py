@@ -1,8 +1,10 @@
 from pydantic import Field, validator
 from typing import List, Optional, Union, Literal
-from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
+from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, \
+    Config
 
-#Input Definitions
+
+# Inputs-Outputs(With Validators)
 
 class InputImageOne(Input):
     name: Literal["inputImageOne"] = "inputImageOne"
@@ -38,8 +40,6 @@ class InputImageTwo(Input):
         title = "Image Input 2"
 
 
-#Output Definitions
-
 class OutputImageOne(Output):
     name: Literal["outputImageOne"] = "outputImageOne"
     value: Union[List[Image], Image]
@@ -74,7 +74,7 @@ class OutputImageTwo(Output):
         title = "Output Image 2"
 
 
-#Single Filter Configs
+# Single Filter Configs
 # Blur
 class BlurKernelSize(Config):
     name: Literal["BlurKernelSize"] = "BlurKernelSize"
@@ -85,6 +85,7 @@ class BlurKernelSize(Config):
     class Config:
         title = "Kernel Size"
 
+
 class BlurSigma(Config):
     name: Literal["BlurSigma"] = "BlurSigma"
     value: float = Field(default=0.0)
@@ -93,6 +94,7 @@ class BlurSigma(Config):
 
     class Config:
         title = "Sigma X"
+
 
 class OptionBlur(Config):
     blurKernelSize: BlurKernelSize
@@ -112,9 +114,10 @@ class EdgeThreshold(Config):
     value: int = Field(default=100)
     type: Literal["integer"] = "integer"
     field: Literal["textInput"] = "textInput"
-    
+
     class Config:
         title = "Edge Threshold"
+
 
 class OptionEdge(Config):
     edgeThreshold: EdgeThreshold
@@ -132,7 +135,7 @@ class ConfigFilterType(Config):
     """
     Select whether to Blur or detect Edges.
     """
-    name: Literal["ConfigFilterType"] = "ConfigFilterType"
+    name: Literal["configFilterType"] = "configFilterType"
     value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -156,6 +159,7 @@ class BlendAlpha(Config):
     class Config:
         title = "Alpha"
 
+
 class OptionBlend(Config):
     blendAlpha: BlendAlpha
     name: Literal["Blend"] = "Blend"
@@ -178,6 +182,7 @@ class ConcatAxis(Config):
     class Config:
         title = "Axis"
 
+
 class OptionConcat(Config):
     concatAxis: ConcatAxis
     name: Literal["Concat"] = "Concat"
@@ -189,12 +194,12 @@ class OptionConcat(Config):
         title = "Concatenate"
 
 
-# Dual Filter Mix Type Dropdown
-class ConfigMixType(Config):
+# --- Dual Filter Mix Type Dropdown ---
+class BlurredEdgedDemo(Config):
     """
     Select how to combine the two images.
     """
-    name: Literal["ConfigMixType"] = "ConfigMixType" 
+    name: Literal["BlurredEdgedDemo"] = "BlurredEdgedDemo"
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -206,18 +211,20 @@ class ConfigMixType(Config):
         }
 
 
-
-
+# EXECUTORS (Single & Dual)
 # Executor 1: SingleFilter
 
 class SingleFilterExecutorInputs(Inputs):
     inputImageOne: InputImageOne
 
+
 class SingleFilterExecutorConfigs(Configs):
     configFilterType: ConfigFilterType
 
+
 class SingleFilterExecutorOutputs(Outputs):
     outputImageOne: OutputImageOne
+
 
 class SingleFilterExecutorRequest(Request):
     inputs: Optional[SingleFilterExecutorInputs]
@@ -228,8 +235,10 @@ class SingleFilterExecutorRequest(Request):
             "target": "configs"
         }
 
+
 class SingleFilterExecutorResponse(Response):
     outputs: SingleFilterExecutorOutputs
+
 
 class SingleFilterExecutor(Config):
     name: Literal["SingleFilterExecutor"] = "SingleFilterExecutor"
@@ -241,23 +250,26 @@ class SingleFilterExecutor(Config):
         title = "Single Filter Executor (1-in, 1-out)"
         json_schema_extra = {
             "target": {
-                "value": 1  
+                "value": 0  # Points to executors entry 0
             }
         }
 
 
-# Executor 2: Dual Filter
+# Executor2:Dual Filter
 
 class DualFilterExecutorInputs(Inputs):
     inputImageOne: InputImageOne
     inputImageTwo: InputImageTwo
 
+
 class DualFilterExecutorConfigs(Configs):
     configMixType: ConfigMixType
 
+
 class DualFilterExecutorOutputs(Outputs):
-    outputImageOne: OutputImageOne 
-    outputImageTwo: OutputImageTwo 
+    outputImageOne: OutputImageOne
+    outputImageTwo: OutputImageTwo
+
 
 class DualFilterExecutorRequest(Request):
     inputs: Optional[DualFilterExecutorInputs]
@@ -268,8 +280,10 @@ class DualFilterExecutorRequest(Request):
             "target": "configs"
         }
 
+
 class DualFilterExecutorResponse(Response):
     outputs: DualFilterExecutorOutputs
+
 
 class DualFilterExecutor(Config):
     name: Literal["DualFilterExecutor"] = "DualFilterExecutor"
@@ -281,7 +295,7 @@ class DualFilterExecutor(Config):
         title = "Dual Filter Executor (2-in, 2-out)"
         json_schema_extra = {
             "target": {
-                "value": 0 
+                "value": 1  # Points to executors entry 1
             }
         }
 
