@@ -84,6 +84,7 @@ class OutputImageTwo(Output):
 # ===========================================
 
 class BlurKernelSize(Config):
+    """Kernel size for Gaussian blur (must be odd)"""
     name: Literal["BlurKernelSize"] = "BlurKernelSize"
     value: int = Field(default=5)
     type: Literal["number"] = "number"
@@ -97,6 +98,7 @@ class BlurKernelSize(Config):
 
 
 class BlurSigma(Config):
+    """Sigma X for Gaussian blur"""
     name: Literal["BlurSigma"] = "BlurSigma"
     value: float = Field(default=0.0)
     type: Literal["number"] = "number"
@@ -122,6 +124,7 @@ class OptionBlur(Config):
 
 
 class EdgeThreshold(Config):
+    """Threshold for Canny edge detection"""
     name: Literal["EdgeThreshold"] = "EdgeThreshold"
     value: int = Field(default=100)
     type: Literal["number"] = "number"
@@ -146,10 +149,12 @@ class OptionEdge(Config):
 
 
 class ConfigFilterType(Config):
+    """Select filter operation: Blur or Edge detection"""
     name: Literal["configFilterType"] = "configFilterType"
     value: Union[OptionBlur, OptionEdge]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True
 
     class Config:
         title = "Filter Type"
@@ -163,6 +168,7 @@ class ConfigFilterType(Config):
 # ===========================================
 
 class BlendAlpha(Config):
+    """Alpha value for blending (0.0 to 1.0)"""
     name: Literal["BlendAlpha"] = "BlendAlpha"
     value: float = Field(default=0.5)
     type: Literal["number"] = "number"
@@ -187,6 +193,7 @@ class OptionBlend(Config):
 
 
 class ConcatAxis(Config):
+    """Axis for concatenation: 0=Vertical, 1=Horizontal"""
     name: Literal["ConcatAxis"] = "ConcatAxis"
     value: int = Field(default=1)
     type: Literal["number"] = "number"
@@ -211,10 +218,12 @@ class OptionConcat(Config):
 
 
 class ConfigMixType(Config):
+    """Select how to combine two images"""
     name: Literal["configMixType"] = "configMixType"
     value: Union[OptionBlend, OptionConcat]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True
 
     class Config:
         title = "Mix Mode"
@@ -224,7 +233,7 @@ class ConfigMixType(Config):
 
 
 # ===========================================
-# SINGLE FILTER EXECUTOR STRUCTURES
+# SINGLE FILTER EXECUTOR
 # ===========================================
 
 class SingleFilterOutputs(Outputs):
@@ -253,9 +262,7 @@ class SingleFilterResponse(Response):
     outputs: SingleFilterOutputs
 
 
-# KEY CHANGE: Add configFilterType directly to the executor option!
 class SingleFilterExecutor(Config):
-    configFilterType: ConfigFilterType  # <-- DIRECT CONFIG FIELD
     name: Literal["SingleFilter"] = "SingleFilter"
     value: Union[SingleFilterRequest, SingleFilterResponse]
     type: Literal["object"] = "object"
@@ -271,7 +278,7 @@ class SingleFilterExecutor(Config):
 
 
 # ===========================================
-# DUAL FILTER EXECUTOR STRUCTURES
+# DUAL FILTER EXECUTOR
 # ===========================================
 
 class DualFilterOutputs(Outputs):
@@ -302,9 +309,7 @@ class DualFilterResponse(Response):
     outputs: DualFilterOutputs
 
 
-# KEY CHANGE: Add configMixType directly to the executor option!
 class DualFilterExecutor(Config):
-    configMixType: ConfigMixType  # <-- DIRECT CONFIG FIELD
     name: Literal["DualFilter"] = "DualFilter"
     value: Union[DualFilterRequest, DualFilterResponse]
     type: Literal["object"] = "object"
@@ -314,7 +319,7 @@ class DualFilterExecutor(Config):
         title = "Dual Filter"
         json_schema_extra = {
             "target": {
-                "value": 1
+                "value": 0
             }
         }
 
@@ -324,6 +329,9 @@ class DualFilterExecutor(Config):
 # ===========================================
 
 class ConfigExecutor(Config):
+    """
+    Select the filter executor type.
+    """
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
     value: Union[SingleFilterExecutor, DualFilterExecutor]
     type: Literal["executor"] = "executor"
