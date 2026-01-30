@@ -219,8 +219,7 @@ class SingleFilterExecutorInputs(Inputs):
 
 
 class SingleFilterExecutorConfigs(Configs):
-    # RENAMED to force schema refresh
-    typeOfFilter: ConfigFilterType
+    configFilterType: ConfigFilterType
 
 
 class SingleFilterExecutorOutputs(Outputs):
