@@ -67,3 +67,4 @@ class BlurredEdged(Component):
 
 if "__main__" == __name__:
     Executor(sys.argv[1]).run()
+    #update edebilmek için eklediğim yorum satırı
