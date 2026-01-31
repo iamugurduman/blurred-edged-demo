@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="package",
-    version="0.0.2",
+    version="0.0.1",
     author="DigiNova",
     author_email='info@diginova.com.tr',
     description="Package",
