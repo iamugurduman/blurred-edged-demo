@@ -3,7 +3,6 @@ from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
 
-
 #Inputs
 
 class InputImageOne(Input):
@@ -78,6 +77,8 @@ class OutputImageTwo(Output):
 
 # ========================================
 
+
+#configs
 class BlurKernelSize(Config):
     """Kernel size for Gaussian blur (must be odd)"""
     name: Literal["BlurKernelSize"] = "BlurKernelSize"
@@ -105,19 +106,6 @@ class BlurSigma(Config):
             "shortDescription": "Blur Sigma"
         }
 
-
-class OptionBlur(Config):
-    blurKernelSize: BlurKernelSize
-    blurSigma: BlurSigma
-    name: Literal["Blur"] = "Blur"
-    value: Literal["Blur"] = "Blur"
-    type: Literal["string"] = "string"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Gaussian Blur"
-
-
 class EdgeThreshold(Config):
     """Threshold for Canny edge detection"""
     name: Literal["EdgeThreshold"] = "EdgeThreshold"
@@ -132,6 +120,18 @@ class EdgeThreshold(Config):
         }
 
 
+class OptionBlur(Config):
+    blurKernelSize: BlurKernelSize
+    blurSigma: BlurSigma
+    name: Literal["Blur"] = "Blur"
+    value: Literal["Blur"] = "Blur"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Gaussian Blur"
+
+
 class OptionEdge(Config):
     edgeThreshold: EdgeThreshold
     name: Literal["Edge"] = "Edge"
@@ -141,23 +141,6 @@ class OptionEdge(Config):
 
     class Config:
         title = "Canny Edge"
-
-
-class ConfigFilterType(Config):
-    """Select filter operation: Blur or Edge detection"""
-    name: Literal["configFilterType"] = "configFilterType"
-    value: Union[OptionBlur, OptionEdge]
-    type: Literal["object"] = "object"
-    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
-    restart: Literal[True] = True
-
-    class Config:
-        title = "Filter Type"
-        json_schema_extra = {
-            "shortDescription": "Filter Operation"
-        }
-
-
 
 
 class BlendAlpha(Config):
@@ -174,16 +157,6 @@ class BlendAlpha(Config):
         }
 
 
-class OptionBlend(Config):
-    blendAlpha: BlendAlpha
-    name: Literal["Blend"] = "Blend"
-    value: Literal["Blend"] = "Blend"
-    type: Literal["string"] = "string"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Blend Images"
-
 
 class ConcatAxis(Config):
     """Axis for concatenation: 0=Vertical, 1=Horizontal"""
@@ -197,6 +170,16 @@ class ConcatAxis(Config):
         json_schema_extra = {
             "shortDescription": "Concat Axis"
         }
+class OptionBlend(Config):
+    blendAlpha: BlendAlpha
+    name: Literal["Blend"] = "Blend"
+    value: Literal["Blend"] = "Blend"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Blend Images"
+
 
 
 class OptionConcat(Config):
@@ -210,7 +193,23 @@ class OptionConcat(Config):
         title = "Concatenate"
 
 
-class ConfigMixType(Config):
+class BlurredEdged(Config):
+    """Select filter operation: Blur or Edge detection"""
+    name: Literal["configFilterType"] = "configFilterType"
+    value: Union[OptionBlur, OptionEdge]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True
+
+    class Config:
+        title = "Filter Type"
+        json_schema_extra = {
+            "shortDescription": "Filter Operation"
+        }
+
+
+
+class BlendedConcat(Config):
     """Select how to combine two images"""
     name: Literal["configMixType"] = "configMixType"
     value: Union[OptionBlend, OptionConcat]
@@ -219,48 +218,76 @@ class ConfigMixType(Config):
     restart: Literal[True] = True
 
     class Config:
-        title = "Mix Mode"
+        title = "Combine Mode"
         json_schema_extra = {
             "shortDescription": "Combine Method"
         }
 
 
-# Single Filter Executor
 
-class SingleFilterOutputs(Outputs):
-    outputImageOne: OutputImageOne
-
-
-class SingleFilterConfigs(Configs):
-    configFilterType: ConfigFilterType
-
-
-class SingleFilterInputs(Inputs):
+#Inputs
+class BlurredEdgedExecutorInputs(Inputs):
     inputImageOne: InputImageOne
 
 
-class SingleFilterRequest(Request):
-    inputs: Optional[SingleFilterInputs]
-    configs: SingleFilterConfigs
+class BlendedConcatExecutorInputs(Inputs):
+    inputImageOne: InputImageOne
+    inputImageTwo: InputImageTwo
+
+
+
+#Configs
+class BlurredEdgedConfigs(Configs):
+    configFilterType: BlurredEdged
+
+class BlendedConcatConfigs(Configs):
+    configMixType: BlendedConcat
+
+#Outputs
+class BlurredEdgedOutputs(Outputs):
+    outputImage: OutputImageOne
+
+
+class BlendedConcatOutputs(Outputs):
+    outputImageOne: OutputImageOne
+    outputImageTwo: OutputImageTwo
+
+#Requests
+class BlurredEdgedExecutorRequest(Request):
+    inputs: Optional[BlurredEdgedExecutorInputs]
+    configs: BlurredEdgedConfigs
 
     class Config:
         json_schema_extra = {
             "target": "configs"
         }
 
+class BlendedConcatExecutorRequest(Request):
+    inputs: Optional[BlendedConcatExecutorInputs]
+    configs: BlendedConcatConfigs
 
-class SingleFilterResponse(Response):
-    outputs: SingleFilterOutputs
+    class Config:
+        json_schema_extra = {
+            "target": "configs"
+        }
+
+#Responses
+class BlurredEdgedResponse(Response):
+    outputs: BlurredEdgedOutputs
+
+class BlendedConcatExecutorResponse(Response):
+    outputs: BlendedConcatOutputs
 
 
-class SingleFilterExecutor(Config):
-    name: Literal["SingleFilter"] = "SingleFilter"
-    value: Union[SingleFilterRequest, SingleFilterResponse]
+#Executors
+class BlurredEdgedExecutor(Config):
+    name: Literal["BlurredEdged"] = "BlurredEdged"
+    value: Union[BlurredEdgedExecutorRequest, BlurredEdgedResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Single Filter"
+        title = "Blurred Edged"
         json_schema_extra = {
             "target": {
                 "value": 0
@@ -268,44 +295,15 @@ class SingleFilterExecutor(Config):
         }
 
 
-#Dual Filter Executor
 
-class DualFilterOutputs(Outputs):
-    outputImageOne: OutputImageOne
-    outputImageTwo: OutputImageTwo
-
-
-class DualFilterConfigs(Configs):
-    configMixType: ConfigMixType
-
-
-class DualFilterInputs(Inputs):
-    inputImageOne: InputImageOne
-    inputImageTwo: InputImageTwo
-
-
-class DualFilterRequest(Request):
-    inputs: Optional[DualFilterInputs]
-    configs: DualFilterConfigs
-
-    class Config:
-        json_schema_extra = {
-            "target": "configs"
-        }
-
-
-class DualFilterResponse(Response):
-    outputs: DualFilterOutputs
-
-
-class DualFilterExecutor(Config):
-    name: Literal["DualFilter"] = "DualFilter"
-    value: Union[DualFilterRequest, DualFilterResponse]
+class BlendedConcatExecutor(Config):
+    name: Literal["BlendedConcat"] = "BlendedConcat"
+    value: Union[BlendedConcatExecutorRequest, BlendedConcatExecutorResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Dual Filter"
+        title = "Blended Concat"
         json_schema_extra = {
             "target": {
                 "value": 0
@@ -316,20 +314,16 @@ class DualFilterExecutor(Config):
 #Main Package
 
 class ConfigExecutor(Config):
-    """
-    Select the filter executor type.
-    """
+
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[SingleFilterExecutor, DualFilterExecutor]
+    value: Union[BlurredEdgedExecutor, BlendedConcatExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
     restart: Literal[True] = True
 
     class Config:
         title = "Task"
-        json_schema_extra = {
-            "shortDescription": "Filter Mode"
-        }
+
 
 
 class PackageConfigs(Configs):
@@ -337,6 +331,6 @@ class PackageConfigs(Configs):
 
 
 class PackageModel(Package):
-    name: Literal["NovaFilters"] = "NovaFilters"
+    name: Literal["BlurredEdgedTest"] = "BlurredEdgedTest"
     configs: PackageConfigs
     type: Literal["component"] = "component"
