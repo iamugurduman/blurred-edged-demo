@@ -245,7 +245,7 @@ class BlendedConcatConfigs(Configs):
 
 #Outputs
 class BlurredEdgedOutputs(Outputs):
-    outputImage: OutputImageOne
+    outputImageOne: OutputImageOne
 
 
 class BlendedConcatOutputs(Outputs):
