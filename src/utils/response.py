@@ -18,7 +18,7 @@ from ..models.PackageModel import (
 def build_response_blurrededged(context):
     output_image = OutputImageOne(value=context.image)
    
-    outputs_container = BlurredEdgedOutputs(outputImage=output_image) 
+    outputs_container = BlurredEdgedOutputs(outputImageOne=output_image) 
     executor_response = BlurredEdgedResponse(outputs=outputs_container)
     single_filter_executor = BlurredEdgedExecutor(value=executor_response)
     config_executor = ConfigExecutor(value=single_filter_executor)
