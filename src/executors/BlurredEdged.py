@@ -44,12 +44,9 @@ class BlurredEdged(Component):
 
         elif self.filterType == "Edge":
             threshold = int(self.edgeThreshold)
-            # Canny requires grayscale image
-            if len(img.shape) == 3:
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = img
-            edges = cv2.Canny(gray, threshold / 2, threshold)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            gray = np.uint8(gray)
+            edges = cv2.Canny(gray, threshold // 2, threshold)
             return cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
         else:
