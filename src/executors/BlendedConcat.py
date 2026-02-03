@@ -21,8 +21,9 @@ class BlendedConcat(Component):
         self.request.model = PackageModel(**(self.request.data))
        
         self.mixType = self.request.get_param("configMixType")
-        self.blendAlpha = self.request.get_param("blendAlpha")
-        self.concatAxis = self.request.get_param("concatAxis")
+        # Use defaults if nested params are not accessible via get_param
+        self.blendAlpha = self.request.get_param("blendAlpha") or 0.5
+        self.concatAxis = self.request.get_param("concatAxis") or 1
         self.image = self.request.get_param("inputImageOne")
         self.image_two = self.request.get_param("inputImageTwo")
 
