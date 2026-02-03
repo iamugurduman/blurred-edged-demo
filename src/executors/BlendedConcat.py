@@ -37,29 +37,22 @@ class BlendedConcat(Component):
     def apply_dual_filter(self, img1, img2):
         if img1 is None or img2 is None:
             return img1
-            
-        rows, cols, _ = img1.shape
-        # Resize img2 to match img1 for simple blending/stacking
-        img2_resized = cv2.resize(img2, (cols, rows))
         
-        result_img = None
+        # Resize img2 to match img1
+        img2_resized = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
         
         if self.mixType == "Blend":
             alpha = float(self.blendAlpha)
-            beta = 1.0 - alpha
-            # Gamma is usually 0
-            result_img = cv2.addWeighted(img1, alpha, img2_resized, beta, 0.0)
+            return cv2.addWeighted(img1, alpha, img2_resized, 1.0 - alpha, 0)
             
         elif self.mixType == "Concat":
             axis = int(self.concatAxis)
             if axis == 1:
-                # Horizontal
-                result_img = cv2.hconcat([img1, img2_resized])
+                return cv2.hconcat([img1, img2_resized])
             else:
-                # Vertical
-                result_img = cv2.vconcat([img1, img2_resized])
+                return cv2.vconcat([img1, img2_resized])
         
-        return result_img
+        return img1
 
     def run(self):
         #Get Frames from Redis
