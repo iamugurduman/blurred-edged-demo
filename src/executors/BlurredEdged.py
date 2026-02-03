@@ -39,12 +39,8 @@ class BlurredEdged(Component):
             return None
         
         if self.filterType == "Blur":
-            k_size = int(self.blurKernelSize)
-            sigma = float(self.blurSigma)
-            # Ensure odd kernel size
-            if k_size % 2 == 0:
-                k_size += 1
-            return cv2.GaussianBlur(img, (k_size, k_size), sigma)
+            ksize = int(self.blurKernelSize) * 2 + 1
+            return cv2.GaussianBlur(img, (ksize, ksize), sigmaX=0)
 
         elif self.filterType == "Edge":
             threshold = int(self.edgeThreshold)
