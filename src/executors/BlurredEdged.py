@@ -21,9 +21,10 @@ class BlurredEdged(Component):
         self.request.model = PackageModel(**(self.request.data))
         
         self.filterType = self.request.get_param("configFilterType")
-        self.blurKernelSize = self.request.get_param("blurKernelSize")
-        self.blurSigma = self.request.get_param("blurSigma")
-        self.edgeThreshold = self.request.get_param("edgeThreshold")
+        # Use defaults if nested params are not accessible via get_param
+        self.blurKernelSize = self.request.get_param("blurKernelSize") or 5
+        self.blurSigma = self.request.get_param("blurSigma") or 0.0
+        self.edgeThreshold = self.request.get_param("edgeThreshold") or 100
         self.image = self.request.get_param("inputImageOne")
 
     @staticmethod
@@ -39,10 +40,10 @@ class BlurredEdged(Component):
             # Ensure odd kernel size
             if k_size % 2 == 0:
                 k_size += 1
-            return cv2.GaussianBlur(img, (k_size, k_size), self.blurSigma)
+            return cv2.GaussianBlur(img, (k_size, k_size), float(self.blurSigma))
 
         elif self.filterType == "Edge":
-            threshold = self.edgeThreshold
+            threshold = int(self.edgeThreshold)
             edges = cv2.Canny(img, threshold / 2, threshold)
             return cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
