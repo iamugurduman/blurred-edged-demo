@@ -20,9 +20,15 @@ class BlendedConcat(Component):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
        
-        self.config_wrapper = self.request.get_param("configMixType")
         self.image = self.request.get_param("inputImageOne")
         self.image_two = self.request.get_param("inputImageTwo")
+        self.mixType = self.request.get_param("configMixType")  # Returns "Blend" or "Concat"
+        
+       
+        if self.mixType == "Blend":
+            self.blendAlpha = self.request.get_param("BlendAlpha")
+        elif self.mixType == "Concat":
+            self.concatAxis = self.request.get_param("ConcatAxis")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
@@ -36,17 +42,16 @@ class BlendedConcat(Component):
         # Resize img2 to match img1 for simple blending/stacking
         img2_resized = cv2.resize(img2, (cols, rows))
         
-        selected_option = self.config_wrapper.value
         result_img = None
         
-        if selected_option.name == "Blend":
-            alpha = selected_option.blendAlpha.value
+        if self.mixType == "Blend":
+            alpha = float(self.blendAlpha)
             beta = 1.0 - alpha
             # Gamma is usually 0
             result_img = cv2.addWeighted(img1, alpha, img2_resized, beta, 0.0)
             
-        elif selected_option.name == "Concat":
-            axis = int(selected_option.concatAxis.value)
+        elif self.mixType == "Concat":
+            axis = int(self.concatAxis)
             if axis == 1:
                 # Horizontal
                 result_img = cv2.hconcat([img1, img2_resized])
