@@ -15,14 +15,15 @@ from components.BlurredEdgedTest.src.utils.response import build_response
 from components.BlurredEdgedTest.src.models.PackageModel import PackageModel
 
 
-
-
 class BlurredEdged(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
         
-        self.config_wrapper = self.request.get_param("configFilterType")
+        self.filterType = self.request.get_param("configFilterType")
+        self.blurKernelSize = self.request.get_param("blurKernelSize")
+        self.blurSigma = self.request.get_param("blurSigma")
+        self.edgeThreshold = self.request.get_param("edgeThreshold")
         self.image = self.request.get_param("inputImageOne")
 
     @staticmethod
@@ -32,20 +33,16 @@ class BlurredEdged(Component):
     def apply_filter(self, img):
         if img is None:
             return None
-            
-        selected_option = self.config_wrapper.value
         
-        if selected_option.name == "Blur":
-            k_size = selected_option.blurKernelSize.value
-            sigma = selected_option.blurSigma.value
+        if self.filterType == "Blur":
+            k_size = int(self.blurKernelSize)
             # Ensure odd kernel size
-            k_size = int(k_size)
             if k_size % 2 == 0:
                 k_size += 1
-            return cv2.GaussianBlur(img, (k_size, k_size), sigma)
+            return cv2.GaussianBlur(img, (k_size, k_size), self.blurSigma)
 
-        elif selected_option.name == "Edge":
-            threshold = selected_option.edgeThreshold.value
+        elif self.filterType == "Edge":
+            threshold = self.edgeThreshold
             edges = cv2.Canny(img, threshold / 2, threshold)
             return cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
@@ -69,4 +66,3 @@ class BlurredEdged(Component):
 
 if "__main__" == __name__:
     Executor(sys.argv[1]).run()
-    #update edebilmek için eklediğim yorum satırı
