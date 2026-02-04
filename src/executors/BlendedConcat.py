@@ -24,11 +24,12 @@ class BlendedConcat(Component):
         self.image_two = self.request.get_param("inputImageTwo")
         self.mixType = self.request.get_param("configMixType")  # Returns "Blend" or "Concat"
         
-       
+        # For storing results
+        self.image_result_one = None
+        self.image_result_two = None
+        
         if self.mixType == "Blend":
             self.blendAlpha = self.request.get_param("BlendAlpha")
-        elif self.mixType == "Concat":
-            self.concatAxis = self.request.get_param("ConcatAxis")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
@@ -36,23 +37,22 @@ class BlendedConcat(Component):
 
     def apply_dual_filter(self, img1, img2):
         if img1 is None or img2 is None:
-            return img1
+            return img1, img1
         
         # Resize img2 to match img1
         img2_resized = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
         
         if self.mixType == "Blend":
             alpha = float(self.blendAlpha)
-            return cv2.addWeighted(img1, alpha, img2_resized, 1.0 - alpha, 0)
+            result = cv2.addWeighted(img1, alpha, img2_resized, 1.0 - alpha, 0)
+            return result, result  # Same result for both outputs
             
         elif self.mixType == "Concat":
-            axis = int(self.concatAxis)
-            if axis == 1:
-                return cv2.hconcat([img1, img2_resized])
-            else:
-                return cv2.vconcat([img1, img2_resized])
+            horizontal = cv2.hconcat([img1, img2_resized])
+            vertical = cv2.vconcat([img1, img2_resized])
+            return horizontal, vertical  # Different results for each output
         
-        return img1
+        return img1, img1
 
     def run(self):
         #Get Frames from Redis
@@ -61,12 +61,13 @@ class BlendedConcat(Component):
         
         #Process
         if img1 is not None and img2 is not None:
-             result_val = self.apply_dual_filter(img1.value, img2.value)
-             img1.value = result_val
+            result_one, result_two = self.apply_dual_filter(img1.value, img2.value)
+            img1.value = result_one
+            img2.value = result_two
         
-        #Set Frame back to Redis (Updating Image One with the result)
-        self.image = Image.set_frame(img=img1, package_uID=self.uID, redis_db=self.redis_db)
-        
+        #Set Frames back to Redis
+        self.image_result_one = Image.set_frame(img=img1, package_uID=self.uID, redis_db=self.redis_db)
+        self.image_result_two = Image.set_frame(img=img2, package_uID=self.uID, redis_db=self.redis_db)
         
         #Build Response
         packageModel = build_response(context=self)

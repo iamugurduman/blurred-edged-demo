@@ -29,10 +29,8 @@ def build_response_blurrededged(context):
 
 
 def build_response_blendedconcat(context):
-    outputImage = OutputImageOne(value=context.image)
-
-    img2_val = getattr(context, 'image_two', None)
-    outputImage2 = OutputImageTwo(value=img2_val if img2_val is not None else context.image) 
+    outputImage = OutputImageOne(value=context.image_result_one)
+    outputImage2 = OutputImageTwo(value=context.image_result_two)
     
     dualOutputs = BlendedConcatOutputs(outputImageOne=outputImage, outputImageTwo=outputImage2)
     dualResponse = BlendedConcatExecutorResponse(outputs=dualOutputs)

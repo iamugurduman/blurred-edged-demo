@@ -183,7 +183,6 @@ class OptionBlend(Config):
 
 
 class OptionConcat(Config):
-    concatAxis: ConcatAxis
     name: Literal["Concat"] = "Concat"
     value: Literal["Concat"] = "Concat"
     type: Literal["string"] = "string"
