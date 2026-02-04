@@ -151,9 +151,23 @@ class BlendAlpha(Config):
     field: Literal["textInput"] = "textInput"
 
     class Config:
-        title = "Alpha"
+        title = "Alpha 1"
         json_schema_extra = {
-            "shortDescription": "Blend Alpha"
+            "shortDescription": "Blend Alpha 1"
+        }
+
+
+class BlendAlpha2(Config):
+    """Second alpha value for blending (0.0 to 1.0)"""
+    name: Literal["BlendAlpha2"] = "BlendAlpha2"
+    value: float = Field(default=0.7)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Alpha 2"
+        json_schema_extra = {
+            "shortDescription": "Blend Alpha 2"
         }
 
 
@@ -172,6 +186,7 @@ class ConcatAxis(Config):
         }
 class OptionBlend(Config):
     blendAlpha: BlendAlpha
+    blendAlpha2: BlendAlpha2
     name: Literal["Blend"] = "Blend"
     value: Literal["Blend"] = "Blend"
     type: Literal["string"] = "string"
