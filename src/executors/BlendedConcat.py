@@ -30,6 +30,7 @@ class BlendedConcat(Component):
         
         if self.mixType == "Blend":
             self.blendAlpha = self.request.get_param("BlendAlpha")
+            self.blendAlpha2 = self.request.get_param("BlendAlpha2")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
@@ -43,9 +44,11 @@ class BlendedConcat(Component):
         img2_resized = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
         
         if self.mixType == "Blend":
-            alpha = float(self.blendAlpha)
-            result = cv2.addWeighted(img1, alpha, img2_resized, 1.0 - alpha, 0)
-            return result, result  # Same result for both outputs
+            alpha1 = float(self.blendAlpha)
+            alpha2 = float(self.blendAlpha2)
+            result1 = cv2.addWeighted(img1, alpha1, img2_resized, 1.0 - alpha1, 0)
+            result2 = cv2.addWeighted(img1, alpha2, img2_resized, 1.0 - alpha2, 0)
+            return result1, result2  # Different blend results for each output
             
         elif self.mixType == "Concat":
             horizontal = cv2.hconcat([img1, img2_resized])
